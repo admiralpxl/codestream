@@ -1498,6 +1498,22 @@ export class ScmManager {
 				}
 			};
 		}
+		if (!request.baseSha)
+			return {
+				sha: "",
+				error: {
+					message: "baseSha is required",
+					type: "REPO_NOT_FOUND"
+				}
+			};
+		if (!request.headSha)
+			return {
+				sha: "",
+				error: {
+					message: "headSha is required",
+					type: "REPO_NOT_FOUND"
+				}
+			};
 		try {
 			const shas = [request.baseSha, request.headSha];
 			const results = await Promise.all(
