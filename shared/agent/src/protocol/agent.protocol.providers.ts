@@ -650,6 +650,7 @@ export interface FetchThirdPartyPullRequestCommitsResponse {
 	};
 	message: string;
 	authoredDate: string;
+	url?: string;
 }
 
 export const FetchThirdPartyPullRequestCommitsType = new RequestType<
