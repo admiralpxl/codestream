@@ -14,7 +14,6 @@ import {
 	ShowPreviousChangedFileNotificationType,
 	EditorRevealRangeRequestType
 } from "@codestream/protocols/webview";
-import { WriteTextFileRequestType, ReadTextFileRequestType } from "@codestream/protocols/agent";
 import { useDidMount } from "../utilities/hooks";
 import { CompareLocalFilesRequestType } from "../ipc/host.protocol";
 import * as path from "path-browserify";
@@ -24,7 +23,10 @@ import { parseCodeStreamDiffUri } from "../store/codemarks/actions";
 import { Link } from "./Link";
 import { Meta, MetaLabel } from "./Codemark/BaseCodemark";
 import { MetaIcons } from "./Review";
-import { getProviderPullRequestRepo } from "../store/providerPullRequests/reducer";
+import {
+	getProviderPullRequestRepo,
+	getPullRequestId
+} from "../store/providerPullRequests/reducer";
 import { CompareFilesProps } from "./PullRequestFilesChangedList";
 import { TernarySearchTree } from "../utilities/searchTree";
 import { PRErrorBox } from "./PullRequestComponents";
@@ -84,7 +86,8 @@ export const PullRequestFilesChanged = (props: Props) => {
 			repos: state.repos,
 			currentRepo: getProviderPullRequestRepo(state),
 			numFiles: props.filesChanged.length,
-			isInVscode: state.ide.name === "VSC"
+			isInVscode: state.ide.name === "VSC",
+			pullRequestId: getPullRequestId(state)
 		};
 	});
 
@@ -183,7 +186,7 @@ export const PullRequestFilesChanged = (props: Props) => {
 						? {
 								pullRequest: {
 									providerId: pr.providerId,
-									id: pr.id
+									id: derivedState.pullRequestId
 								}
 						  }
 						: undefined
@@ -191,6 +194,7 @@ export const PullRequestFilesChanged = (props: Props) => {
 				try {
 					await HostApi.instance.send(CompareLocalFilesRequestType, request);
 				} catch (err) {
+					console.warn(err);
 					setErrorMessage(err || "Could not open file diff");
 				}
 
@@ -201,7 +205,7 @@ export const PullRequestFilesChanged = (props: Props) => {
 				});
 			})(i);
 		},
-		[derivedState.currentRepo, repoId, visitedFiles, forkPointSha, pr]
+		[derivedState.currentRepo, repoId, visitedFiles, forkPointSha, pr, derivedState.pullRequestId]
 	);
 
 	const nextFile = useCallback(() => {
