@@ -49,15 +49,16 @@ export const PullRequestFilesChangedTab = (props: {
 		setIsLoading(false);
 	};
 
-	useEffect(() => {
-		// re-render if providerPullRequests changes
-		(async () => {
-			const data = await dispatch(
-				getPullRequestFiles(pr.providerId, derivedState.currentPullRequestId!)
-			);
-			_mapData(data);
-		})();
-	}, [derivedState.providerPullRequests]);
+	// this is causing an infinite loop...
+	// useEffect(() => {
+	// 	// re-render if providerPullRequests changes
+	// 	(async () => {
+	// 		const data = await dispatch(
+	// 			getPullRequestFiles(pr.providerId, derivedState.currentPullRequestId!)
+	// 		);
+	// 		_mapData(data);
+	// 	})();
+	// }, [derivedState.providerPullRequests]);
 
 	useDidMount(() => {
 		setIsLoading(true);
