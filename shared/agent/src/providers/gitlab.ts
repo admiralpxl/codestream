@@ -548,6 +548,7 @@ export class GitLabProvider extends ThirdPartyIssueProviderBase<CSGitLabProvider
 			Logger.error(ex);
 		}
 
+		prs.forEach(pr => (pr.number = pr.iid));
 		return prs;
 	}
 
@@ -670,11 +671,12 @@ export class GitLabProvider extends ThirdPartyIssueProviderBase<CSGitLabProvider
 			if (item && item.body) {
 				response[index] = item.body
 					.filter((_: any) => _.id)
-					.map((pr: { created_at: string; id: string }) => ({
+					.map((pr: { created_at: string; id: string; iid: string }) => ({
 						...pr,
 						id: `gid://gitlab/MergeRequest/${pr.id}`,
 						providerId: this.providerConfig?.id,
-						createdAt: new Date(pr.created_at).getTime()
+						createdAt: new Date(pr.created_at).getTime(),
+						number: parseInt(pr.iid, 10)
 					}));
 
 				if (!queries[index].match(/\bsort:/)) {
@@ -881,6 +883,7 @@ export class GitLabProvider extends ThirdPartyIssueProviderBase<CSGitLabProvider
 					id: string;
 					idComputed: string;
 					iid: string;
+					number: number;
 					sourceBranch: string;
 					targetBranch: string;
 					title: string;
@@ -1024,6 +1027,7 @@ export class GitLabProvider extends ThirdPartyIssueProviderBase<CSGitLabProvider
 				nameWithOwner: response.project.mergeRequest.sourceProject.fullPath,
 				url: response.project.mergeRequest.sourceProject.webUrl
 			};
+			response.project.mergeRequest.number = parseInt(response.project.mergeRequest.iid, 10);
 			response.project.mergeRequest.url = response.project.mergeRequest.sourceProject.webUrl;
 			response.project.mergeRequest.merged = !!response.project.mergeRequest.mergedAt;
 			// build this so that it aligns with what the REST api created
@@ -1833,6 +1837,7 @@ export class GitLabProvider extends ThirdPartyIssueProviderBase<CSGitLabProvider
 interface GitLabPullRequest {
 	id: number;
 	iid: number;
+	number: number;
 	title: string;
 	web_url: string;
 	state: string;
