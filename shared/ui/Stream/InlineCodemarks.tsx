@@ -1200,17 +1200,20 @@ export class SimpleInlineCodemarks extends Component<Props, State> {
 		} = this.props;
 
 		const composeOpen = composeCodemarkActive ? true : false;
+		const isGitLabPR =
+			currentPullRequestId &&
+			(currentPullRequestProviderId === "gitlab*com" ||
+				currentPullRequestProviderId === "gitlab/enterprise");
 		return (
-			<Modal noScroll noPadding onClose={() => this.close()}>
-				<div style={{ overflow: "hidden" }}>
+			<Modal noScroll noPadding onClose={isGitLabPR ? undefined : () => this.close()}>
+				<div>
 					{currentReviewId ? (
 						<ReviewNav reviewId={currentReviewId} composeOpen={composeOpen} />
 					) : currentPullRequestId ? (
 						currentPullRequestProviderId === "github*com" ||
 						currentPullRequestProviderId === "github/enterprise" ? (
 							<PullRequest />
-						) : currentPullRequestProviderId === "gitlab*com" ||
-						  currentPullRequestProviderId === "gitlab/enterprise" ? (
+						) : isGitLabPR ? (
 							<GitLabPullRequest />
 						) : (
 							<div id="oops">
