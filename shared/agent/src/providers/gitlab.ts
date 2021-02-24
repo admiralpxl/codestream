@@ -1028,6 +1028,15 @@ export class GitLabProvider extends ThirdPartyIssueProviderBase<CSGitLabProvider
 						  title
 						}
 					  }
+					  currentUserTodos(last: 100) {
+						nodes {
+						  action
+						  body
+						  id
+						  targetType
+						  state
+						}
+					  }
 					timeEstimate
 					totalTimeSpent
 					discussions {
@@ -1472,7 +1481,36 @@ export class GitLabProvider extends ThirdPartyIssueProviderBase<CSGitLabProvider
 			{}
 		);
 
-		return { directives: [] };
+		return {
+			directives: [
+				{
+					type: "updatePullRequest",
+					data: {
+						currentUserTodos: {
+							nodes: [data.body]
+						}
+					}
+				}
+			]
+		};
+	}
+
+	async markToDoDone(request: { id: string }): Promise<Directives> {
+		const id = request.id.toString().replace(/.*Todo\//, "");
+		const data = await this.restPost<{}, { state: string }>(`/todos/${id}/mark_as_done`, {});
+
+		return {
+			directives: [
+				{
+					type: "updatePullRequest",
+					data: {
+						currentUserTodos: {
+							nodes: [data.body]
+						}
+					}
+				}
+			]
+		};
 	}
 
 	@log()
